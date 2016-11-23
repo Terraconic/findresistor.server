@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_software" default="compile.module.software">
+  <dirname property="module.software.basedir" file="${ant.file.module_software}"/>
+  
+  <property name="module.jdk.home.software" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.software" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.software" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.software" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="software.output.dir" value="${module.software.basedir}/out/production/Software"/>
+  <property name="software.testoutput.dir" value="${module.software.basedir}/out/test/Software"/>
+  
+  <path id="software.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="software.module.production.classpath">
+    <path refid="${module.jdk.classpath.software}"/>
+    <path refid="library.mariadb-java-client-1.2.3.classpath"/>
+    <path refid="library.opencv-300.classpath"/>
+  </path>
+  
+  <path id="software.runtime.production.module.classpath">
+    <pathelement location="${software.output.dir}"/>
+    <path refid="library.mariadb-java-client-1.2.3.classpath"/>
+    <path refid="library.opencv-300.classpath"/>
+  </path>
+  
+  <path id="software.module.classpath">
+    <path refid="${module.jdk.classpath.software}"/>
+    <pathelement location="${software.output.dir}"/>
+    <path refid="library.mariadb-java-client-1.2.3.classpath"/>
+    <path refid="library.opencv-300.classpath"/>
+  </path>
+  
+  <path id="software.runtime.module.classpath">
+    <pathelement location="${software.testoutput.dir}"/>
+    <pathelement location="${software.output.dir}"/>
+    <path refid="library.mariadb-java-client-1.2.3.classpath"/>
+    <path refid="library.opencv-300.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.software">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.software">
+    <patternset refid="excluded.from.module.software"/>
+  </patternset>
+  
+  <path id="software.module.sourcepath">
+    <dirset dir="${module.software.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.software" depends="compile.module.software.production,compile.module.software.tests" description="Compile module Software"/>
+  
+  <target name="compile.module.software.production" depends="register.custom.compilers" description="Compile module Software; production classes">
+    <mkdir dir="${software.output.dir}"/>
+    <javac2 destdir="${software.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.software}/javac">
+      <compilerarg line="${compiler.args.software}"/>
+      <bootclasspath refid="software.module.bootclasspath"/>
+      <classpath refid="software.module.production.classpath"/>
+      <src refid="software.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.software"/>
+    </javac2>
+    
+    <copy todir="${software.output.dir}">
+      <fileset dir="${module.software.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.software.tests" depends="register.custom.compilers,compile.module.software.production" description="compile module Software; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.software" description="cleanup module">
+    <delete dir="${software.output.dir}"/>
+    <delete dir="${software.testoutput.dir}"/>
+  </target>
+</project>
